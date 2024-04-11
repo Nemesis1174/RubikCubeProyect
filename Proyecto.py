@@ -442,15 +442,17 @@ class RubikSolver:
 
 os.system('cls')
 
+'''
 cube = RubikCube()
 
 print("Estado inicial del.cube:\n")
 cube.print_cube()
 print()
 
-cube.random_shuffle(2)
+cube.random_shuffle(3)
 
 solver = RubikSolver(cube)
+'''
 
 # Número de ejecuciones
 num_executions = 20
@@ -458,20 +460,19 @@ num_executions = 20
 # Lista para almacenar los tiempos de ejecución
 execution_times = []
 
+
 # Bucle para ejecutar el algoritmo 20 veces y medir el tiempo
 for i in range(num_executions):
     cube = RubikCube()  # Creamos un nuevo cubo Rubik
-    cube.random_shuffle(2)  # Barajamos aleatoriamente el cubo
-    print("Estado inicial del.cube:\n")
-    cube.print_cube()
-    print()
+    cube.random_shuffle(3)  # Barajamos aleatoriamente el cubo
+ 
     solver = RubikSolver(cube)  # Creamos un solucionador con el cubo barajado
     
     # Probar el algoritmo de búsqueda en amplitud (BFS)
     print("Best First Search:")
     # Obtener el tiempo de inicio
     start_time = time.time()
-    num_moves, moves = solver.best_first_search(Heuristics.incorrect_orientations)
+    num_moves, moves = solver.a_star(Heuristics.hamming_distance)
     # Obtener el tiempo de finalización
     end_time = time.time()
     # Calcular el tiempo transcurrido
@@ -493,6 +494,7 @@ print("Promedio de tiempo de ejecución:", average_execution_time, "segundos")
 print("Tiempo mínimo de ejecución:", min_execution_time, "segundos")
 print("Tiempo máximo de ejecución:", max_execution_time, "segundos")
 
+
 '''
 # Probar el algoritmo de la mejor primer búsqueda (BFS)
 print("Best First Search:")
@@ -509,8 +511,6 @@ num_moves, moves = solver.a_star(Heuristics.hamming_distance)
 print("\nNúmero de movimientos:", num_moves)
 print("Secuencia de movimientos:", moves)
 print()
-cube.print_cube()
-print()
 '''
 
 '''
@@ -522,4 +522,5 @@ print("\nNúmero de movimientos:", num_moves)
 print("Secuencia de movimientos:", moves)
 print()
 '''
+
 
