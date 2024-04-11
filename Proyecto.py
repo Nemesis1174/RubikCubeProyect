@@ -2,6 +2,7 @@ import os
 import copy
 import random
 import heapq
+import time
 from queue import PriorityQueue
 from collections import deque
 
@@ -447,21 +448,53 @@ print("Estado inicial del.cube:\n")
 cube.print_cube()
 print()
 
-cube.random_shuffle(3)
+cube.random_shuffle(2)
 
-solver = RubikSolver(cube)
+solver = RubikSolver(RubikCube())
+
+# Número de ejecuciones
+num_executions = 20
+
+# Lista para almacenar los tiempos de ejecución
+execution_times = []
+
+# Bucle para ejecutar el algoritmo 20 veces y medir el tiempo
+for i in range(num_executions):
+    cube = RubikCube()  # Creamos un nuevo cubo Rubik
+    cube.random_shuffle(2)  # Barajamos aleatoriamente el cubo
+    print("Estado inicial del.cube:\n")
+    cube.print_cube()
+    print()
+    solver = RubikSolver(cube)  # Creamos un solucionador con el cubo barajado
+    
+    # Probar el algoritmo de búsqueda en amplitud (BFS)
+    print("Best First Search:")
+    # Obtener el tiempo de inicio
+    start_time = time.time()
+    num_moves, moves = solver.best_first_search(Heuristics.incorrect_orientations)
+    # Obtener el tiempo de finalización
+    end_time = time.time()
+    # Calcular el tiempo transcurrido
+    execution_time = end_time - start_time
+    print("\nNúmero de movimientos:", num_moves)
+    print("Secuencia de movimientos:", moves)
+    print("Tiempo de ejecución:", execution_time, "segundos")
+    print()
+    
+    execution_times.append(execution_time)  # Agregar el tiempo a la lista
+
+# Calcular el promedio, mínimo y máximo de tiempo de ejecución
+average_execution_time = sum(execution_times) / num_executions
+min_execution_time = min(execution_times)
+max_execution_time = max(execution_times)
+
+# Imprimir los resultados
+print("Promedio de tiempo de ejecución:", average_execution_time, "segundos")
+print("Tiempo mínimo de ejecución:", min_execution_time, "segundos")
+print("Tiempo máximo de ejecución:", max_execution_time, "segundos")
 
 '''
-# Probar el algoritmo de búsqueda en amplitud (BFS)
-print("Breadth First Search:")
-num_moves, moves = solver.breadth_first_search()
-print("\nNúmero de movimientos:", num_moves)
-print("Secuencia de movimientos:", moves)
-print()
-'''
-
-'''
-# Probar el algoritmo de búsqueda en amplitud (BFS)
+# Probar el algoritmo de la mejor primer búsqueda (BFS)
 print("Best First Search:")
 num_moves, moves = solver.best_first_search(Heuristics.hamming_distance)
 print("\nNúmero de movimientos:", num_moves)
@@ -490,4 +523,3 @@ print("Secuencia de movimientos:", moves)
 print()
 '''
 
-    
