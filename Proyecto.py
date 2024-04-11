@@ -56,12 +56,10 @@ class RubikCube:
         return self.cube == self.solved_cube
     
     def move(self, move_func):
-        # La función de movimiento se pasa como argumento, así que la llamamos directamente
         move_func()
     
     @staticmethod
     def rotar_contra_reloj(matriz):
-        #Switch rows
         matriz = matriz[::-1]
         matriz_rotada = [list(x) for x in zip(*matriz)]
         return matriz_rotada
@@ -163,25 +161,19 @@ class RubikCube:
             if move:
                 move_name = self.get_move_name(move_num)
                 print("Movimiento:", move_num, "-", move_name, "\n")
-                move()  # Ejecutar el movimiento
-                self.print_cube()
-                print()
+                move() 
             else:
                 print("Movimiento inválido:", move_num)
 
     def random_shuffle(self, num_moves):
-        # Realizar un shuffle aleatorio
         print("Random shuffle:\n")
         for _ in range(num_moves):
             move, move_num = random.choice(self.movements)
             move_name = self.get_move_name(move_num)
             print("Movimiento:", move_num, "-", move_name, "\n")
-            move()  # Ejecutar el movimiento
-            self.print_cube()
-            print()
+            move()  
 
     def get_move_name(self, move_num):
-        # Retorna la descripción del movimiento según el número asignado
         if move_num == 1:
             return "Rotación en el eje X (arriba)"
         elif move_num == 2:
@@ -265,13 +257,11 @@ class Heuristics:
         return distance
         
     
-#Basic Nodes
 class Node:
     def __init__(self, cube):
         self.cube = cube
         self.path = []
 
-#Nodes with heuristic value
 class Nodeh:
     def __init__(self, cube):
         self.cube = cube
@@ -300,13 +290,11 @@ class NodeAStar(Nodeh):
         return hash(cube_tuple)
     
     
-# Definición de la clase Solver para resolver el Cubo de Rubik
 class RubikSolver:
     def __init__(self, cube):
         self.cube = cube
         self.path = []
 
-    # Implementación del algoritmo BFS
     def breadth_first_search(self):
         cube = self.cube
         start_node = Node(copy.deepcopy(cube.cube))
@@ -319,7 +307,6 @@ class RubikSolver:
         while queue:
             current_node = queue.popleft()
             if current_node.cube == final_node.cube:
-                # Obtener solo el número del movimiento en la secuencia de movimientos
                 path = [move_num for _, move_num in current_node.path]
                 return len(path), [num for _, num in current_node.path]
             
@@ -339,7 +326,6 @@ class RubikSolver:
         
         return False
 
-    # Implementación del algoritmo Best-First Search (similar a Greedy Best-First)
     def best_first_search(self, heuristic):
         cube = self.cube
         start_node = Nodeh(copy.deepcopy(cube.cube))
@@ -354,7 +340,6 @@ class RubikSolver:
         while priority_queue:
             current_node = heapq.heappop(priority_queue)[1]
             if current_node.cube == goal_node.cube:
-                # Obtener solo el número del movimiento en la secuencia de movimientos
                 path = [move_num for _, move_num in current_node.path]
                 return len(path), [num for _, num in current_node.path]
                 
@@ -365,13 +350,12 @@ class RubikSolver:
                 cube.cube = new_cube_state
                 cube.move(move_func)
                 neighbor_node = Nodeh(cube.cube)
-                neighbor_node.path = current_node.path + [(move_func, move_num)]  # Actualizar el camino con el nuevo movimiento
+                neighbor_node.path = current_node.path + [(move_func, move_num)] 
                 neighbor_node.calculate_heuristic(heuristic)
 
                 if neighbor_node not in visited:
                     heapq.heappush(priority_queue, (neighbor_node.value_heuristic, neighbor_node))
                 else:
-                    # Si el nodo vecino ya está en la cola de prioridad, actualizamos su valor heurístico si es menor
                     for _, node in priority_queue:
                         if node == neighbor_node and node.value_heuristic > neighbor_node.value_heuristic:
                             node.value_heuristic = neighbor_node.value_heuristic
@@ -393,7 +377,6 @@ class RubikSolver:
         while not pq.empty():
             current_node = pq.get()
             if current_node.cube == goal_node.cube:
-                # Obtener solo el número del movimiento en la secuencia de movimientos
                 path = [move_num for _, move_num in current_node.path]
                 return len(path), [num for _, num in current_node.path]
 
@@ -458,59 +441,53 @@ class RubikSolver:
 
 os.system('cls')
 
-# Ejemplo de uso
-if __name__ == "__main__":
-    # Se crea un objeto de la clase RubikCube para representar el estado inicial del.cube
-    cube = RubikCube()
-    
-    print("Estado inicial del.cube:\n")
-    cube.print_cube()
-    print()
-    # Se hace un shuffle aleatorio en el.cube
-    cube.random_shuffle(2)
+cube = RubikCube()
 
-    # Crear un objeto de la clase RubikSolver
-    solver = RubikSolver(cube)
-    
-    '''
-    # Probar el algoritmo de búsqueda en amplitud (BFS)
-    print("Breadth First Search:")
-    num_moves, moves = solver.breadth_first_search()
-    print("\nNúmero de movimientos:", num_moves)
-    print("Secuencia de movimientos:", moves)
-    print()
-    '''
+print("Estado inicial del.cube:\n")
+cube.print_cube()
+print()
 
-    '''
-    # Probar el algoritmo de búsqueda en amplitud (BFS)
-    print("Best First Search:")
-    num_moves, moves = solver.best_first_search(Heuristics.hamming_distance)
-    print("\nNúmero de movimientos:", num_moves)
-    print("Secuencia de movimientos:", moves)
-    print()
-    '''
-    
-    '''
-    # Probar el algoritmo de búsqueda A* 
-    print("A* Search:")
-    num_moves, moves = solver.a_star(Heuristics.hamming_distance)
-    print("\nNúmero de movimientos:", num_moves)
-    print("Secuencia de movimientos:", moves)
-    print()
-    cube.print_cube()
-    print()
-    '''
-    
-    '''
-    # Probar el algoritmo IDA*
-    print("IDA* Search:")
-    # Llamar al método IDA* con la heurística deseada
-    num_moves, moves = solver.ida_star(Heuristics.hamming_distance)
-    print("\nNúmero de movimientos:", num_moves)
-    print("Secuencia de movimientos:", moves)
-    print()
-    '''
-    
-    
-    
+cube.random_shuffle(3)
+
+solver = RubikSolver(cube)
+
+'''
+# Probar el algoritmo de búsqueda en amplitud (BFS)
+print("Breadth First Search:")
+num_moves, moves = solver.breadth_first_search()
+print("\nNúmero de movimientos:", num_moves)
+print("Secuencia de movimientos:", moves)
+print()
+'''
+
+'''
+# Probar el algoritmo de búsqueda en amplitud (BFS)
+print("Best First Search:")
+num_moves, moves = solver.best_first_search(Heuristics.hamming_distance)
+print("\nNúmero de movimientos:", num_moves)
+print("Secuencia de movimientos:", moves)
+print()
+'''
+
+'''
+# Probar el algoritmo de búsqueda A* 
+print("A* Search:")
+num_moves, moves = solver.a_star(Heuristics.hamming_distance)
+print("\nNúmero de movimientos:", num_moves)
+print("Secuencia de movimientos:", moves)
+print()
+cube.print_cube()
+print()
+'''
+
+'''
+# Probar el algoritmo IDA*
+print("IDA* Search:")
+# Llamar al método IDA* con la heurística deseada
+num_moves, moves = solver.ida_star(Heuristics.hamming_distance)
+print("\nNúmero de movimientos:", num_moves)
+print("Secuencia de movimientos:", moves)
+print()
+'''
+
     
