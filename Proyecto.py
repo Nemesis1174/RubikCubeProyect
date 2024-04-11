@@ -174,6 +174,7 @@ class RubikCube:
             self.rotate_in_z_lower()
 
     def list_shuffle(self, moves_list):
+        print("List shuffle:\n")
         for move_num in moves_list:
             move, _ = next((m for m in self.movements if m[1] == move_num), None)
             if move:
@@ -187,6 +188,7 @@ class RubikCube:
 
     def random_shuffle(self, num_moves):
         # Realizar un shuffle aleatorio
+        print("Random shuffle:\n")
         for _ in range(num_moves):
             move, move_num = random.choice(self.movements)
             move_name = self.get_move_name(move_num)
@@ -331,56 +333,54 @@ class RubikSolver:
         
         queue = deque([start_node])
         
-        num_moves = 0
-        
         while queue:
             current_node = queue.popleft()
             if current_node.cube == final_node.cube:
-                return num_moves, self.path
+                # Obtener solo el número del movimiento en la secuencia de movimientos
+                path = [move_num for _, move_num in current_node.path]
+                return len(path), [num for _, num in current_node.path]
             
             visited.add(current_node)
             
-            for move_num in cube.movements:
-                move_func, _ = next((m for m in cube.movements if m[1] == move_num[1]), None)
-                self.path.append(move_num[1])
+            for move_func, move_num in cube.movements:
                 if move_func:
                     new_cube = copy.deepcopy(current_node.cube)
                     cube.cube = new_cube
                     cube.move(move_func) 
                     neighbor_node = Node(cube.cube)
-                    neighbor_node.path = current_node.path + [move_num]
+                    neighbor_node.path = current_node.path + [(move_func, move_num)]
                     
                     if neighbor_node not in visited:
                         queue.append(neighbor_node)
                         visited.add(neighbor_node)
-                        num_moves += 1
         
         return False
-            
+
     # Implementación del algoritmo Best-First Search (similar a Greedy Best-First)
     def best_first_search(self, heuristic):
         cube = self.cube
         start_node = Nodeh(copy.deepcopy(cube.cube))
         goal_node = Node(copy.deepcopy(cube.solved_cube))
+        
         visited = set()
+        
         priority_queue = []
         
         heapq.heappush(priority_queue, (start_node.value_heuristic, start_node))
-        
-        num_moves = 0
 
         while priority_queue:
             current_node = heapq.heappop(priority_queue)[1]
             if current_node.cube == goal_node.cube:
-                return len(current_node.path), current_node.path
-            
+                # Obtener solo el número del movimiento en la secuencia de movimientos
+                path = [move_num for _, move_num in current_node.path]
+                return len(path), [num for _, num in current_node.path]
+                
             visited.add(current_node)
             
             for move_func, move_num in cube.movements:
                 new_cube_state = copy.deepcopy(current_node.cube)
                 cube.cube = new_cube_state
                 cube.move(move_func)
-                num_moves += 1
                 neighbor_node = Nodeh(cube.cube)
                 neighbor_node.path = current_node.path + [(move_func, move_num)]  # Actualizar el camino con el nuevo movimiento
                 neighbor_node.calculate_heuristic(heuristic)
@@ -392,13 +392,43 @@ class RubikSolver:
                     for _, node in priority_queue:
                         if node == neighbor_node and node.value_heuristic > neighbor_node.value_heuristic:
                             node.value_heuristic = neighbor_node.value_heuristic
-                    
+        
         return False
-
 
     # Implementación del algoritmo A*
     def a_star(self, heuristic):
-        pass
+        cube = self.cube
+        start_node = NodeAStar(copy.deepcopy(cube.cube))
+        goal_node = Node(copy.deepcopy(cube.solved_cube))
+        
+        visited = set()
+        
+        pq = PriorityQueue()
+        
+        pq.put(start_node)
+
+        while not pq.empty():
+            current_node = pq.get()
+            if current_node.cube == goal_node.cube:
+                # Obtener solo el número del movimiento en la secuencia de movimientos
+                path = [move_num for _, move_num in current_node.path]
+                return len(path), [num for _, num in current_node.path]
+
+            if current_node in visited:
+                continue
+
+            visited.add(current_node)
+            for move_func, move_num in cube.movements:
+                new_cube_state = copy.deepcopy(current_node.cube)
+                cube.cube = new_cube_state
+                cube.move(move_func)
+                neighbor_node = NodeAStar(copy.deepcopy(cube.cube))
+                neighbor_node.path = current_node.path + [(move_func, move_num)]
+                neighbor_node.calculate_heuristic(heuristic)
+                neighbor_node.distance = current_node.distance + 1
+                pq.put(neighbor_node)
+
+        return False
 
     def ida_star(self):
         pass
@@ -415,7 +445,7 @@ if __name__ == "__main__":
     cube.print_cube()
     print()
     # Se hace un shuffle aleatorio en el.cube
-    cube.random_shuffle(1)  # Por ejemplo, hacer 5 movimientos aleatorios
+    cube.random_shuffle(2)  # Por ejemplo, hacer 5 movimientos aleatorios
 
     # Crear un objeto de la clase RubikSolver
     solver = RubikSolver(cube)
@@ -429,9 +459,24 @@ if __name__ == "__main__":
     print()
     '''
 
+    '''
     # Probar el algoritmo de búsqueda en amplitud (BFS)
     print("Best First Search:")
     num_moves, moves = solver.best_first_search(Heuristics.hamming_distance)
     print("\nNúmero de movimientos:", num_moves)
     print("Secuencia de movimientos:", moves)
     print()
+    '''
+    
+    
+    # Probar el algoritmo de búsqueda A* 
+    print("A* Search:")
+    num_moves, moves = solver.a_star(Heuristics.hamming_distance)
+    print("\nNúmero de movimientos:", num_moves)
+    print("Secuencia de movimientos:", moves)
+    print()
+    cube.print_cube()
+    print()
+    
+    
+    
