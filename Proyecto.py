@@ -38,18 +38,18 @@ class RubikCube:
         self.solved_cube = copy.deepcopy(self.cube)
         
         self.movements = [
-            (self.rotate_in_x_upper, 1),
-            (self.rotate_in_x_lower, 2),
-            (self.rotate_in_y_upper, 3),
-            (self.rotate_in_y_lower, 4),
-            (self.rotate_in_z_upper, 5),
-            (self.rotate_in_z_lower, 6),
-            (self.rotate_in_x_upper_anticlock, 7),
-            (self.rotate_in_x_lower_anticlock, 8),
-            (self.rotate_in_y_upper_anticlock, 9),
-            (self.rotate_in_y_lower_anticlock, 10),
-            (self.rotate_in_z_upper_anticlock, 11),
-            (self.rotate_in_z_lower_anticlock, 12)
+            (self.rotate_upper, 1),
+            (self.rotate_lower, 2),
+            (self.rotate_left, 3),
+            (self.rotate_right, 4),
+            (self.rotate_front, 5),
+            (self.rotate_back, 6),
+            (self.rotate_upper_anticlock, 7),
+            (self.rotate_lower_anticlock, 8),
+            (self.rotate_left_anticlock, 9),
+            (self.rotate_right_anticlock, 10),
+            (self.rotate_front_anticlock, 11),
+            (self.rotate_back_anticlock, 12)
         ]
 
     def is_solved(self):
@@ -59,119 +59,102 @@ class RubikCube:
         # La función de movimiento se pasa como argumento, así que la llamamos directamente
         move_func()
     
-    def rotate_in_x_upper(self):
-        # Copy the affected sides to temporary matrices
-        temp0 = [row[:] for row in self.cube[0]]
-        temp1 = [row[:] for row in self.cube[1]]
-        temp2 = [row[:] for row in self.cube[2]]
-        temp4 = [row[:] for row in self.cube[4]]
-
-        # Rotate the elements in the temporary matrices clockwise
-        for i in range(len(temp0)):
-            for j in range(len(temp0)):
-                self.cube[0][i][j] = temp1[i][j]
-                self.cube[1][i][j] = temp2[i][j]
-                self.cube[2][i][j] = temp4[i][j]
-                self.cube[4][i][j] = temp0[i][j]
-
-    def rotate_in_x_upper_anticlock(self):
-        for _ in range(3):
-            self.rotate_in_x_upper()
-                            
-    def rotate_in_x_lower(self):
-        # Copy the affected sides to temporary matrices
-        temp0 = [row[:] for row in self.cube[0]]
-        temp1 = [row[:] for row in self.cube[1]]
-        temp3 = [row[:] for row in self.cube[3]]
-        temp5 = [row[:] for row in self.cube[5]]
-
-        # Rotate the elements in the temporary matrices counter-clockwise
-        for i in range(len(temp0)):
-            for j in range(len(temp0)):
-                self.cube[0][i][j] = temp3[i][j]
-                self.cube[1][i][j] = temp0[i][j]
-                self.cube[3][i][j] = temp5[i][j]
-                self.cube[5][i][j] = temp1[i][j]
+    @staticmethod
+    def rotar_contra_reloj(matriz):
+        #Switch rows
+        matriz = matriz[::-1]
+        matriz_rotada = [list(x) for x in zip(*matriz)]
+        return matriz_rotada
     
-    def rotate_in_x_lower_anticlock(self):
+    def rotate_upper(self):
+        self.cube[0] = self.rotar_contra_reloj(self.cube[0])
+        movements = [2, 3, 4, 5]
+        aux = self.cube[movements[0]][0][::-1]
+        self.cube[movements[0]][0] = self.cube[movements[1]][0]
+        self.cube[movements[1]][0] = self.cube[movements[2]][0]
+        self.cube[movements[2]][0] = self.cube[movements[3]][2][::-1]
+        self.cube[movements[3]][2] = aux
+
+    def rotate_upper_anticlock(self):
         for _ in range(3):
-            self.rotate_in_x_lower()
-
-    def rotate_in_y_upper(self):
-        # Copy the affected sides to temporary matrices
-        temp0 = [row[:] for row in self.cube[0]]
-        temp2 = [row[:] for row in self.cube[2]]
-        temp1 = [row[:] for row in self.cube[1]]
-        temp3 = [row[:] for row in self.cube[3]]
-
-        # Rotate the elements in the temporary matrices clockwise
-        for i in range(len(temp0)):
-            for j in range(len(temp0)):
-                self.cube[0][i][j] = temp3[i][j]
-                self.cube[2][i][j] = temp0[i][j]
-                self.cube[1][i][j] = temp2[i][j]
-                self.cube[3][i][j] = temp1[i][j]
-
-    def rotate_in_y_upper_anticlock(self):
+            self.rotate_upper()
+                            
+    def rotate_lower(self):
+        self.cube[1] = self.rotar_contra_reloj(self.cube[1])
+        movements = [4, 3, 2, 5]
+        aux = self.cube[movements[0]][2][::-1]
+        self.cube[movements[0]][2] = self.cube[movements[1]][2]
+        self.cube[movements[1]][2] = self.cube[movements[2]][2]
+        self.cube[movements[2]][2] = self.cube[movements[3]][0][::-1]
+        self.cube[movements[3]][0] = aux
+    
+    def rotate_lower_anticlock(self):
         for _ in range(3):
-            self.rotate_in_y_upper()
+            self.rotate_lower()
 
-    def rotate_in_y_lower(self):
-        # Copy the affected sides to temporary matrices
-        temp0 = [row[:] for row in self.cube[0]]
-        temp2 = [row[:] for row in self.cube[2]]
-        temp1 = [row[:] for row in self.cube[1]]
-        temp3 = [row[:] for row in self.cube[3]]
+    def rotate_left(self):
+        self.cube[2] = self.rotar_contra_reloj(self.cube[2])
+        movements = [0, 5, 1, 3]
+        aux = [self.cube[movements[0]][j][0] for j in range(3)]  
+        for i in range(3):
+            for j in range(3):  
+                self.cube[movements[i]][j][0] = self.cube[movements[i + 1]][j][0]
+        for j in range(3):  
+            self.cube[movements[3]][j][0] = aux[j]
 
-        # Rotate the elements in the temporary matrices counter-clockwise
-        for i in range(len(temp0)):
-            for j in range(len(temp0)):
-                self.cube[0][i][j] = temp2[i][j]
-                self.cube[2][i][j] = temp1[i][j]
-                self.cube[1][i][j] = temp3[i][j]
-                self.cube[3][i][j] = temp0[i][j]
-
-    def rotate_in_y_lower_anticlock(self):
+    def rotate_left_anticlock(self):
         for _ in range(3):
-            self.rotate_in_y_lower()
+            self.rotate_left()
 
-    def rotate_in_z_upper(self):
-        # Copy the affected sides to temporary matrices
-        temp2 = [row[:] for row in self.cube[2]]
-        temp3 = [row[:] for row in self.cube[3]]
-        temp4 = [row[:] for row in self.cube[4]]
-        temp5 = [row[:] for row in self.cube[5]]
+    def rotate_right(self):
+        self.cube[4] = self.rotar_contra_reloj(self.cube[4])
+        movements = [3, 1, 5 ,0]
+        aux = [self.cube[movements[0]][j][2] for j in range(3)]  
+        for i in range(3):
+            for j in range(3):  
+                self.cube[movements[i]][j][2] = self.cube[movements[i + 1]][j][2]
+        for j in range(3):  
+            self.cube[movements[3]][j][2] = aux[j]
 
-        # Rotate the elements in the temporary matrices clockwise
-        for i in range(len(temp2)):
-            for j in range(len(temp2)):
-                self.cube[2][i][j] = temp5[i][j]
-                self.cube[3][i][j] = temp2[i][j]
-                self.cube[4][i][j] = temp3[i][j]
-                self.cube[5][i][j] = temp4[i][j]
-
-    def rotate_in_z_upper_anticlock(self):
+    def rotate_right_anticlock(self):
         for _ in range(3):
-            self.rotate_in_z_upper()
+            self.rotate_right()
 
-    def rotate_in_z_lower(self):
-        # Copy the affected sides to temporary matrices
-        temp2 = [row[:] for row in self.cube[2]]
-        temp3 = [row[:] for row in self.cube[3]]
-        temp4 = [row[:] for row in self.cube[4]]
-        temp5 = [row[:] for row in self.cube[5]]
+    def rotate_front(self):
+        self.cube[3] = self.rotar_contra_reloj(self.cube[3])
+        movements = [4, 0, 2, 1]
+        aux = [self.cube[movements[0]][j][0] for j in range(3)]  
+        for i in range(3):
+            self.cube[movements[0]][i][0] = self.cube[movements[1]][2][i]
+        for i in range(3):
+            self.cube[movements[1]][2][i] = self.cube[movements[2]][2 -i][2]
+        for i in range(3):
+            self.cube[movements[2]][i][2] = self.cube[movements[3]][0][i]
+        for i in range(3):
+            aux = aux[::-1]
+            self.cube[movements[3]][0][i] = aux[i]
 
-        # Rotate the elements in the temporary matrices counter-clockwise
-        for i in range(len(temp2)):
-            for j in range(len(temp2)):
-                self.cube[2][i][j] = temp3[i][j]
-                self.cube[3][i][j] = temp4[i][j]
-                self.cube[4][i][j] = temp5[i][j]
-                self.cube[5][i][j] = temp2[i][j]
-
-    def rotate_in_z_lower_anticlock(self):
+    def rotate_front_anticlock(self):
         for _ in range(3):
-            self.rotate_in_z_lower()
+            self.rotate_front()
+
+    def rotate_back(self):
+        self.cube[5] = self.rotar_contra_reloj(self.cube[5])
+        movements = [1, 2, 0, 4]
+        aux = [self.cube[movements[0]][2][j] for j in range(3)]  
+        for i in range(3):
+            self.cube[movements[0]][2][i] = self.cube[movements[1]][i][0]
+        for i in range(3):
+            self.cube[movements[1]][i][0] = self.cube[movements[2]][0][2 - i]
+        for i in range(3):
+            self.cube[movements[2]][0][i] = self.cube[movements[3]][i][2]
+        for i in range(3):
+            aux = aux[::-1]
+            self.cube[movements[3]][i][2] = aux[i]
+
+    def rotate_back_anticlock(self):
+        for _ in range(3):
+            self.rotate_back()
 
     def list_shuffle(self, moves_list):
         print("List shuffle:\n")
@@ -430,8 +413,47 @@ class RubikSolver:
 
         return False
 
-    def ida_star(self):
-        pass
+    def ida_star(self, heuristic):
+        depth_limit = 1
+        while True:
+            found, solution = self.ida_star_search(heuristic, depth_limit, [])
+            if found:
+                return len(solution), solution
+            depth_limit += 1
+
+    def ida_star_search(self, heuristic, depth_limit, path):
+        if depth_limit == 0:
+            if self.cube.is_solved():
+                return True, path
+            else:
+                return False, None
+
+        for move_func, move_num in self.cube.movements:
+            new_cube = copy.deepcopy(self.cube)
+            new_cube.move(move_func)
+            new_path = path + [move_num]
+            found, solution = self.__recursive_search(new_cube, heuristic, depth_limit - 1, new_path)
+            if found:
+                return True, solution
+
+        return False, None
+
+    def __recursive_search(self, cube, heuristic, depth_limit, path):
+        if depth_limit == 0:
+            if cube.is_solved():
+                return True, path
+            else:
+                return False, None
+
+        for move_func, move_num in cube.movements:
+            new_cube = copy.deepcopy(cube)
+            new_cube.move(move_func)
+            new_path = path + [move_num]
+            found, solution = self.__recursive_search(new_cube, heuristic, depth_limit - 1, new_path)
+            if found:
+                return True, solution
+
+        return False, None
 
 
 os.system('cls')
@@ -445,7 +467,7 @@ if __name__ == "__main__":
     cube.print_cube()
     print()
     # Se hace un shuffle aleatorio en el.cube
-    cube.random_shuffle(2)  # Por ejemplo, hacer 5 movimientos aleatorios
+    cube.random_shuffle(2)
 
     # Crear un objeto de la clase RubikSolver
     solver = RubikSolver(cube)
@@ -468,7 +490,7 @@ if __name__ == "__main__":
     print()
     '''
     
-    
+    '''
     # Probar el algoritmo de búsqueda A* 
     print("A* Search:")
     num_moves, moves = solver.a_star(Heuristics.hamming_distance)
@@ -477,6 +499,18 @@ if __name__ == "__main__":
     print()
     cube.print_cube()
     print()
+    '''
+    
+    '''
+    # Probar el algoritmo IDA*
+    print("IDA* Search:")
+    # Llamar al método IDA* con la heurística deseada
+    num_moves, moves = solver.ida_star(Heuristics.hamming_distance)
+    print("\nNúmero de movimientos:", num_moves)
+    print("Secuencia de movimientos:", moves)
+    print()
+    '''
+    
     
     
     
