@@ -278,7 +278,7 @@ class Heuristics:
                     if cubie != goal_cubie:
                         distance += 1
         return distance
-    
+        
     
 #Basic Nodes
 class Node:
@@ -356,7 +356,7 @@ class RubikSolver:
                         num_moves += 1
         
         return False
-   
+            
     # Implementación del algoritmo Best-First Search (similar a Greedy Best-First)
     def best_first_search(self, heuristic):
         cube = self.cube
@@ -372,24 +372,29 @@ class RubikSolver:
         while priority_queue:
             current_node = heapq.heappop(priority_queue)[1]
             if current_node.cube == goal_node.cube:
-                return num_moves, current_node.path
+                return len(current_node.path), current_node.path
             
             visited.add(current_node)
             
-            for move_func, _ in cube.movements:
+            for move_func, move_num in cube.movements:
                 new_cube_state = copy.deepcopy(current_node.cube)
                 cube.cube = new_cube_state
                 cube.move(move_func)
                 num_moves += 1
                 neighbor_node = Nodeh(cube.cube)
-                neighbor_node.path = current_node.path + [move_func]
+                neighbor_node.path = current_node.path + [(move_func, move_num)]  # Actualizar el camino con el nuevo movimiento
                 neighbor_node.calculate_heuristic(heuristic)
 
                 if neighbor_node not in visited:
                     heapq.heappush(priority_queue, (neighbor_node.value_heuristic, neighbor_node))
-                    visited.add(neighbor_node)
+                else:
+                    # Si el nodo vecino ya está en la cola de prioridad, actualizamos su valor heurístico si es menor
+                    for _, node in priority_queue:
+                        if node == neighbor_node and node.value_heuristic > neighbor_node.value_heuristic:
+                            node.value_heuristic = neighbor_node.value_heuristic
                     
         return False
+
 
     # Implementación del algoritmo A*
     def a_star(self, heuristic):
@@ -410,7 +415,7 @@ if __name__ == "__main__":
     cube.print_cube()
     print()
     # Se hace un shuffle aleatorio en el.cube
-    cube.random_shuffle(3)  # Por ejemplo, hacer 5 movimientos aleatorios
+    cube.random_shuffle(1)  # Por ejemplo, hacer 5 movimientos aleatorios
 
     # Crear un objeto de la clase RubikSolver
     solver = RubikSolver(cube)
@@ -426,10 +431,7 @@ if __name__ == "__main__":
 
     # Probar el algoritmo de búsqueda en amplitud (BFS)
     print("Best First Search:")
-    num_moves, moves = solver.best_first_search(Heuristics.manhattan_distance)
-    if num_moves:
-        print("\nNúmero de movimientos:", num_moves)
-        print("Secuencia de movimientos:", moves)
-    else:
-        print("No se encontró solución.")
+    num_moves, moves = solver.best_first_search(Heuristics.hamming_distance)
+    print("\nNúmero de movimientos:", num_moves)
+    print("Secuencia de movimientos:", moves)
     print()
