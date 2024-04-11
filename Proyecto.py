@@ -450,7 +450,7 @@ print()
 
 cube.random_shuffle(2)
 
-solver = RubikSolver(RubikCube())
+solver = RubikSolver(cube)
 
 # Número de ejecuciones
 num_executions = 20
